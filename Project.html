@@ -196,7 +196,16 @@ hljs.initHighlightingOnLoad();
 <pre><code class="r">##rm(list = ls())
 library(tree)
 library(caret)
-##download.file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;, method = &quot;curl&quot;, quiet = TRUE, destfile = &quot;training.csv&quot;)
+</code></pre>
+
+<pre><code>## Warning: package &#39;caret&#39; was built under R version 3.1.1
+</code></pre>
+
+<pre><code>## Loading required package: lattice
+## Loading required package: ggplot2
+</code></pre>
+
+<pre><code class="r">##download.file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;, method = &quot;curl&quot;, quiet = TRUE, destfile = &quot;training.csv&quot;)
 ##download.file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;, method = &quot;curl&quot;, quiet = TRUE, destfile = &quot;testing.csv&quot;)
 
 traindata_raw       &lt;- read.csv(&quot;training.csv&quot;)

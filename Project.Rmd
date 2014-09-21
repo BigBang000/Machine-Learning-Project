@@ -1,0 +1,68 @@
+Predicting the 'Manner of Exercise' from wearable accelerometer data
+========================================================
+Coursera: Machine Learning Course
+
+
+## SYNOPSIS
+We partition the training data set into 'training' and 'cross-validation' sub-datasets. For noise reduction and efficency purposes, we eliminate near-zero variables from the list of possible predictors. Utilizing the 'training' sub-dataset, we then build a decision tree model with the 'classe' as the response variable. Then, we  apply this model to predict the variable 'classe' in the cross-validation subset. By comparing the prediction with the true values, we compute the model's accuracy and misclassification rates.
+
+Note: The 'real testing dataset is NOT utilized for model building, (nor could it be utilized, since the 'classe' variable is missing in it)
+
+
+## DATA PROCESSING
+
+### Load
+```{r, cache =TRUE}
+##rm(list = ls())
+library(tree)
+library(caret)
+##download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", method = "curl", quiet = TRUE, destfile = "training.csv")
+##download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", method = "curl", quiet = TRUE, destfile = "testing.csv")
+
+traindata_raw       <- read.csv("training.csv")
+testdata_raw        <- read.csv("testing.csv")    ## This is not used in the model building process
+##head(traindata_raw)
+
+```
+### Preprocess
+```{r, echo = TRUE}
+temp             <- traindata_raw[,2:160]          ## Don't use obs number as a predcitor
+nzv              <- nearZeroVar(temp)
+traindata        <- temp[,-nzv]               ##Eliminate near-zero variables, since they have little predictive value.
+
+##Split training data into training and cross-validation
+set.seed(3); 
+intrain       <- createDataPartition(y = temp$classe, p = 0.8,list = FALSE)
+trg           <- traindata[intrain,]
+cross_val     <- traindata[-intrain,]
+```
+
+### Model Building
+```{r, echo = TRUE}
+## Build the model
+tree.model1      <- tree( classe ~., data = trg)
+print(summary(tree.model1))
+
+## Model Improving
+cv               <- cv.tree(tree.model1, FUN = prune.misclass)
+print(names(cv))
+print(cv)
+tree.model2      <- prune.misclass(tree.model1, best = 3)
+```
+
+### Cross-validate and Calculate the Accuracy and Misclassification Rates
+```{r, echo = TRUE}
+pred            <-  predict(tree.model1, newdata = cross_val, type = "class")   ##Utilize the cross-val subset of the training data to study goodness of the model
+true            <-  cross_val$classe
+result_matrix   <- table(pred,true)
+cat("The confusion matrix is:\n")
+print(result_matrix)
+accuracy        <- sum(diag(result_matrix))/sum(result_matrix)
+misclass        <- 1- accuracy
+```
+
+## RESULTS
+ 
+```{r fig.width=10, fig.height=10, echo = TRUE}
+cat("The accuracy and misclassification rates of the decsion tree model are", signif(accuracy,2), " and ", signif(misclass,2), " respectively")
+```
